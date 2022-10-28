@@ -2,45 +2,50 @@
 /**
  * Copyright (c) 2011-2015  Regents of the University of California.
  *
- * This file is part of ndnSIM. See AUTHORS for complete list of ndnSIM authors and
- * contributors.
+ * This file is part of ndnSIM. See AUTHORS for complete list of ndnSIM authors
+ *and contributors.
  *
- * ndnSIM is free software: you can redistribute it and/or modify it under the terms
- * of the GNU General Public License as published by the Free Software Foundation,
- * either version 3 of the License, or (at your option) any later version.
+ * ndnSIM is free software: you can redistribute it and/or modify it under the
+ *terms of the GNU General Public License as published by the Free Software
+ *Foundation, either version 3 of the License, or (at your option) any later
+ *version.
  *
- * ndnSIM is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
- * PURPOSE.  See the GNU General Public License for more details.
+ * ndnSIM is distributed in the hope that it will be useful, but WITHOUT ANY
+ *WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+ *A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License along with
- * ndnSIM, e.g., in COPYING.md file.  If not, see <http://www.gnu.org/licenses/>.
+ * ndnSIM, e.g., in COPYING.md file.  If not, see
+ *<http://www.gnu.org/licenses/>.
  **/
 
 #include "ndn-consumer.hpp"
-#include "ns3/ptr.h"
-#include "ns3/log.h"
-#include "ns3/simulator.h"
-#include "ns3/packet.h"
-#include "ns3/callback.h"
-#include "ns3/string.h"
-#include "ns3/boolean.h"
-#include "ns3/uinteger.h"
-#include "ns3/integer.h"
-#include "ns3/double.h"
 
-#include "utils/ndn-ns3-packet-tag.hpp"
-#include "utils/ndn-rtt-mean-deviation.hpp"
-
-#include <ndn-cxx/lp/tags.hpp>
+#include <boost/uuid/sha1.hpp>
 
 #include <boost/lexical_cast.hpp>
 #include <boost/ref.hpp>
+#include <ndn-cxx/lp/tags.hpp>
+
+#include "ns3/boolean.h"
+#include "ns3/callback.h"
+#include "ns3/double.h"
+#include "ns3/integer.h"
+#include "ns3/log.h"
+#include "ns3/packet.h"
+#include "ns3/ptr.h"
+#include "ns3/simulator.h"
+#include "ns3/string.h"
+#include "ns3/uinteger.h"
+#include "utils/ndn-ns3-packet-tag.hpp"
+#include "utils/ndn-rtt-mean-deviation.hpp"
 
 NS_LOG_COMPONENT_DEFINE("ndn.Consumer");
 
 namespace ns3 {
 namespace ndn {
+
+typedef boost::array<boost::uint8_t, 20> hash_data_t;
 
 NS_OBJECT_ENSURE_REGISTERED(Consumer);
 
@@ -60,7 +65,8 @@ Consumer::GetTypeId(void)
                     MakeTimeAccessor(&Consumer::m_interestLifeTime), MakeTimeChecker())
 
       .AddAttribute("RetxTimer",
-                    "Timeout defining how frequent retransmission timeouts should be checked",
+                    "Timeout defining how frequent retransmission timeouts "
+                    "should be checked",
                     StringValue("50ms"),
                     MakeTimeAccessor(&Consumer::GetRetxTimer, &Consumer::SetRetxTimer),
                     MakeTimeChecker())
@@ -155,6 +161,41 @@ Consumer::StopApplication() // Called at time specified by Stop
   App::StopApplication();
 }
 
+hash_data_t
+Consumer::get_sha1_hash(const void* data, const std::size_t byte_count)
+{
+  boost::uuids::detail::sha1 sha1;
+  sha1.process_bytes(data, byte_count);
+  unsigned int digest[5];
+  sha1.get_digest(digest);
+  const boost::uint8_t* p_digest = reinterpret_cast<const boost::uint8_t*>(digest);
+  hash_data_t hash_data;
+  for (int i = 0; i < 5; ++i) {
+    hash_data[i * 4] = p_digest[i * 4 + 3];
+    hash_data[i * 4 + 1] = p_digest[i * 4 + 2];
+    hash_data[i * 4 + 2] = p_digest[i * 4 + 1];
+    hash_data[i * 4 + 3] = p_digest[i * 4];
+  }
+  return hash_data;
+}
+
+string
+Consumer::calcSha1Hash(Name name)
+{
+  string nameStr = name.toUri();
+  string prefix = "/nakazato.lab";
+  // cout << "I_NDN_CONS " << nameStr << endl;
+  hash_data_t hash = get_sha1_hash(nameStr.c_str(), nameStr.size());
+  hash_data_t::const_iterator itr = hash.begin();
+  const hash_data_t::const_iterator end_itr = hash.end();
+  stringstream ss;
+  for (; itr != end_itr; ++itr) {
+    ss << std::hex << ((*itr & 0xf0) >> 4) << (*itr & 0x0f);
+  }
+  string hashStr = ss.str();
+  return hashStr;
+}
+
 void
 Consumer::SendPacket()
 {
@@ -180,9 +221,12 @@ Consumer::SendPacket()
 
     seq = m_seq++;
   }
-
-  //
-  shared_ptr<Name> nameWithSequence = make_shared<Name>(m_interestName);
+  
+  string name = m_interestName.toUri();
+  std::string contentHash = calcSha1Hash(m_interestName);
+  shared_ptr<Name> hashed = make_shared<Name>(Name(contentHash));
+  
+  shared_ptr<Name> nameWithSequence = make_shared<Name>(m_interestName);  
   nameWithSequence->appendSequenceNumber(seq);
   //
 
@@ -190,6 +234,8 @@ Consumer::SendPacket()
   shared_ptr<Interest> interest = make_shared<Interest>();
   interest->setNonce(m_rand->GetValue(0, std::numeric_limits<uint32_t>::max()));
   interest->setName(*nameWithSequence);
+  interest->setHashedName(*hashed);
+
   interest->setCanBePrefix(false);
   time::milliseconds interestLifeTime(m_interestLifeTime.GetMilliSeconds());
   interest->setInterestLifetime(interestLifeTime);
@@ -239,7 +285,8 @@ Consumer::OnData(shared_ptr<const Data> data)
 
   entry = m_seqFullDelay.find(seq);
   if (entry != m_seqFullDelay.end()) {
-    m_firstInterestDataDelay(this, seq, Simulator::Now() - entry->time, m_seqRetxCounts[seq], hopCount);
+    m_firstInterestDataDelay(this, seq, Simulator::Now() - entry->time, m_seqRetxCounts[seq],
+                             hopCount);
   }
 
   m_seqRetxCounts.erase(seq);
@@ -259,15 +306,15 @@ Consumer::OnNack(shared_ptr<const lp::Nack> nack)
   App::OnNack(nack);
 
   NS_LOG_INFO("NACK received for: " << nack->getInterest().getName()
-              << ", reason: " << nack->getReason());
+                                    << ", reason: " << nack->getReason());
 }
 
 void
 Consumer::OnTimeout(uint32_t sequenceNumber)
 {
   NS_LOG_FUNCTION(sequenceNumber);
-  // std::cout << Simulator::Now () << ", TO: " << sequenceNumber << ", current RTO: " <<
-  // m_rtt->RetransmitTimeout ().ToDouble (Time::S) << "s\n";
+  // std::cout << Simulator::Now () << ", TO: " << sequenceNumber << ", current
+  // RTO: " << m_rtt->RetransmitTimeout ().ToDouble (Time::S) << "s\n";
 
   m_rtt->IncreaseMultiplier(); // Double the next RTO
   m_rtt->SentSeq(SequenceNumber32(sequenceNumber),

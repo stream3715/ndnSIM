@@ -169,6 +169,12 @@ public:
   typedef std::function<std::unique_ptr<nfd::cs::Policy>()> PolicyCreationCallback;
 
   /**
+   * \brief Set Node ID
+   */
+  void
+  setNodeId(const std::string& id);
+
+  /**
    * \brief Set the replacement policy of NFD's CS
    */
   void
