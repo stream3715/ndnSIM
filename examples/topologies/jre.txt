@@ -1,0 +1,53 @@
+router
+
+#node  city  y  x
+atami     NA  21.54 3.66
+odawara   NA  21.54 7.90
+chigasaki NA  21.77 12.54
+ofuna     NA  21.86 15.90
+hashimoto NA  16.50 17.10
+zushi     NA  24.00 16.30
+kurihama  NA  24.00 19.20
+yokohama  NA  21.80 21.50
+kawasaki  NA  20.80 26.00
+musashi-kosugi NA 19.70 22.70
+osaki     NA  18.90 25.30
+shinjuku  NA  14.70 24.00
+shinagawa NA  18.60 27.70
+tokyo     NA  15.90 28.80
+ueno      NA  14.23 28.90
+akabane   NA  11.30 26.70
+omiya     NA  8.66 22.70
+utsunomiya NA 6.18 30.16
+takasaki  NA  6.35 14.50
+
+
+link
+
+# from     to     capacity    metric   delay   queue
+atami      odawara   10Mbps      5   1ms   50
+odawara    chigasaki 10Mbps      5   1ms   50
+chigasaki  ofuna     10Mbps      5   1ms   50
+chigasaki  hashimoto 10Mbps     10   1ms   50
+ofuna      yokohama  10Mbps      5   1ms   50
+ofuna      zushi     10Mbps      5   1ms   50
+zushi      kurihama  10Mbps     10   1ms   50
+hashimoto  yokohama  10Mbps      5   1ms   50
+yokohama   kawasaki  10Mbps      5   1ms   50
+yokohama   musashi-kosugi 10Mbps      5   1ms   50
+kawasaki   musashi-kosugi 10Mbps      5   1ms   50
+kawasaki   shinagawa 10Mbps      5   1ms   50
+musashi-kosugi osaki 10Mbps      5   1ms   50
+osaki      shinjuku  10Mbps      5   1ms   50
+osaki      shinagawa 10Mbps      5   1ms   50
+shinjuku   akabane   10Mbps      5   1ms   50
+shinagawa  tokyo     10Mbps      5   1ms   50
+tokyo      ueno      10Mbps      5   1ms   50
+ueno       akabane   10Mbps      5   1ms   50
+akabane    omiya     10Mbps      5   1ms   50
+omiya      utsunomiya 10Mbps      5   1ms   50
+omiya      takasaki  10Mbps      5   1ms   50
+tokyo      shinjuku  10Mbps      5   1ms   50
+tokyo      shinagawa 100Mbps     1   1ms   50
+shinagawa  odawara   100Mbps     1   1ms   50
+odawara    atami     100Mbps     1   1ms   50
