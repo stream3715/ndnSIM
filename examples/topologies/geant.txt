@@ -1,0 +1,104 @@
+router
+
+#node  city  y  x
+rtr-1   NA  34.88969   82.37403
+rtr-2   NA  34.34878   80.85045
+rtr-3   NA  42.56553   85.67594
+rtr-4   NA  46.96667   82.41667
+rtr-5   NA  38.68333   80.11667
+rtr-6   NA  44.42076   80.08804
+rtr-7   NA  36.13      79.61167
+rtr-8   NA  32.3488    78.85341
+rtr-9   NA  37.44744   76.94809
+rtr-10  NA  39.18951   75.46427
+rtr-11  NA  53.32415   72.69751
+rtr-12  NA  56.10626   74.43225
+rtr-13  NA  64.91155   69.05901
+rtr-14  NA  53.71622   67.97945
+rtr-15  NA  63.36667   65.16667
+rtr-16  NA  64.75      61.5
+rtr-17  NA  44.42556   65.90917
+rtr-18  NA  51.43333   72
+rtr-19  NA  49.26361   72.44111
+rtr-20  NA  49.03991   77.49801
+rtr-21  NA  47.10674   78.14816
+rtr-22  NA  20.86667   68.71667
+rtr-23  NA  26.29744   70.4165
+rtr-24  NA  50.46513   74.80401
+rtr-25  NA  45.97798   75.81444
+rtr-26  NA  44.50513   76.05108
+rtr-27  NA  46.37208   78.20849
+rtr-28  NA  53.9       84.9
+rtr-29  NA  67.61556   85.75222
+rtr-30  NA  8.10459    94.13548
+rtr-31  NA  23.73281   83.34399
+rtr-32  NA  29.87426   81.50853
+rtr-33  NA  40         92
+rtr-34  NA  48.0649    89.33258
+rtr-35  NA  52.26869   90.45148
+rtr-36  NA  54.75353   89.43696
+rtr-37  NA  54.10589   86.946
+
+
+
+link
+
+# from     to     capacity    metric   delay   queue
+rtr-1      rtr-2     10Mbps      1   1ms   50
+rtr-1      rtr-3     10Mbps      1   1ms   50
+rtr-1      rtr-5     10Mbps      1   1ms   50
+rtr-1      rtr-32    10Mbps      1   1ms   50
+rtr-1      rtr-28    10Mbps      1   1ms   50
+rtr-2      rtr-31    10Mbps      1   1ms   50
+rtr-3      rtr-30    10Mbps      1   1ms   50
+rtr-3      rtr-33    10Mbps      1   1ms   50
+rtr-3      rtr-5     10Mbps      1   1ms   50
+rtr-3      rtr-36    10Mbps      1   1ms   50
+rtr-3      rtr-34    10Mbps      1   1ms   50
+rtr-3      rtr-29    10Mbps      1   1ms   50
+rtr-4      rtr-5     10Mbps      1   1ms   50
+rtr-4      rtr-6     10Mbps      1   1ms   50
+rtr-4      rtr-28    10Mbps      1   1ms   50
+rtr-5      rtr-6     10Mbps      1   1ms   50
+rtr-5      rtr-7     10Mbps      1   1ms   50
+rtr-5      rtr-9     10Mbps      1   1ms   50
+rtr-5      rtr-15    10Mbps      1   1ms   50
+rtr-5      rtr-16    10Mbps      1   1ms   50
+rtr-5      rtr-27    10Mbps      1   1ms   50
+rtr-5      rtr-29    10Mbps      1   1ms   50
+rtr-6      rtr-21    10Mbps      1   1ms   50
+rtr-7      rtr-8     10Mbps      1   1ms   50
+rtr-8      rtr-9     10Mbps      1   1ms   50
+rtr-8      rtr-24    10Mbps      1   1ms   50
+rtr-8      rtr-32    10Mbps      1   1ms   50
+rtr-9      rtr-10    10Mbps      1   1ms   50
+rtr-9      rtr-24    10Mbps      1   1ms   50
+rtr-10     rtr-24    10Mbps      1   1ms   50
+rtr-10     rtr-17    10Mbps      1   1ms   50
+rtr-10     rtr-27    10Mbps      1   1ms   50
+rtr-10     rtr-14    10Mbps      1   1ms   50
+rtr-11     rtr-20    10Mbps      1   1ms   50
+rtr-11     rtr-18    10Mbps      1   1ms   50
+rtr-11     rtr-12    10Mbps      1   1ms   50
+rtr-11     rtr-13    10Mbps      1   1ms   50
+rtr-11     rtr-14    10Mbps      1   1ms   50
+rtr-12     rtr-13    10Mbps      1   1ms   50
+rtr-12     rtr-20    10Mbps      1   1ms   50
+rtr-14     rtr-27    10Mbps      1   1ms   50
+rtr-15     rtr-32    10Mbps      1   1ms   50
+rtr-16     rtr-28    10Mbps      1   1ms   50
+rtr-19     rtr-25    10Mbps      1   1ms   50
+rtr-20     rtr-24    10Mbps      1   1ms   50
+rtr-20     rtr-25    10Mbps      1   1ms   50
+rtr-20     rtr-21    10Mbps      1   1ms   50
+rtr-21     rtr-27    10Mbps      1   1ms   50
+rtr-22     rtr-23    10Mbps      1   1ms   50
+rtr-22     rtr-32    10Mbps      1   1ms   50
+rtr-25     rtr-26    10Mbps      1   1ms   50
+rtr-26     rtr-27    10Mbps      1   1ms   50
+rtr-28     rtr-37    10Mbps      1   1ms   50
+rtr-30     rtr-32    10Mbps      1   1ms   50
+rtr-31     rtr-32    10Mbps      1   1ms   50
+rtr-33     rtr-34    10Mbps      1   1ms   50
+rtr-34     rtr-35    10Mbps      1   1ms   50
+rtr-36     rtr-37    10Mbps      1   1ms   50
