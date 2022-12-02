@@ -24,6 +24,8 @@
 #include "ns3/packet.h"
 #include "ns3/simulator.h"
 
+#include <ndn-cxx/lp/tags.hpp>
+
 #include "model/ndn-l3-protocol.hpp"
 #include "helper/ndn-fib-helper.hpp"
 
@@ -109,6 +111,13 @@ Producer::OnInterest(shared_ptr<const Interest> interest)
   data->setFreshnessPeriod(::ndn::time::milliseconds(m_freshness.GetMilliSeconds()));
 
   data->setContent(make_shared< ::ndn::Buffer>(m_virtualPayloadSize));
+
+  int hopCount = 0;
+  auto hopCountTag = interest->getTag<lp::HopCountTag>();
+  if (hopCountTag != nullptr) { // e.g., packet came from local node's cache
+    hopCount = *hopCountTag;
+  }
+  data->setTag(make_shared<lp::HopCountTag>(hopCount));
 
   Signature signature;
   SignatureInfo signatureInfo(static_cast< ::ndn::tlv::SignatureTypeValue>(255));

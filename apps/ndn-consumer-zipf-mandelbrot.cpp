@@ -39,7 +39,7 @@ ConsumerZipfMandelbrot::GetTypeId(void)
       .SetParent<ConsumerCbr>()
       .AddConstructor<ConsumerZipfMandelbrot>()
 
-      .AddAttribute("NumberOfContents", "Number of the Contents in total", StringValue("100"),
+      .AddAttribute("NumberOfContents", "Number of the Contents in total", StringValue("10"),
                     MakeUintegerAccessor(&ConsumerZipfMandelbrot::SetNumberOfContents,
                                          &ConsumerZipfMandelbrot::GetNumberOfContents),
                     MakeUintegerChecker<uint32_t>())

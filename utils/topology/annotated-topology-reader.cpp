@@ -518,7 +518,7 @@ public:
   operator()(std::ostream& out, const VertexOrEdge& v) const
   {
     // out << "[label=\"" << names[v] << "\",style=filled,fillcolor=\"" << colors[v] << "\"]";
-    out << "[shape=\"circle\",width=0.1,label=\"\",style=filled,fillcolor=\"green\"]";
+    out << "[shape=\"circle\",width=0.1,label=\"" << names[v] << "\",style=filled,fillcolor=\"white\"]";
   }
 
 private:
