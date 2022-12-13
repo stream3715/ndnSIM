@@ -133,6 +133,7 @@ main(int argc, char* argv[])
   int csSize(csSizeStr ? atoi(csSizeStr) : 0);
 
   ndnHelper.setCsSize(csSize);
+  ndnHelper.SetDefaultRoutes(true);
   ndnHelper.InstallAll();
 
   // Choosing forwarding strategy
@@ -151,6 +152,7 @@ main(int argc, char* argv[])
     cerr << "[ERROR] No such variable found!" << endl;
     exit(EXIT_FAILURE);
   }
+  vector<string> vecProdId = split(env_prdId, ",");
 
   tmp = getenv("ID_CON_MJ");
   string env_conIdMajor(tmp ? tmp : "");
@@ -169,16 +171,17 @@ main(int argc, char* argv[])
   vector<string> vecConMinorId = split(env_conIdMinor, ",");
 
   // Producer
-  Ptr<Node> producerMain = Names::Find<Node>("rtr-" + env_prdId);
+  Ptr<Node> producerPrimary = Names::Find<Node>("rtr-" + vecProdId[0]);
+  ndn::AppHelper producerPrimaryHelper("ns3::ndn::Producer");
+  producerPrimaryHelper.SetAttribute("PayloadSize", StringValue("1024"));
+  producerPrimaryHelper.SetPrefix(prefix + "/major");
+  producerPrimaryHelper.Install(producerPrimary); // last node
 
-  ndn::AppHelper producerHelper("ns3::ndn::Producer");
-  producerHelper.SetAttribute("PayloadSize", StringValue("1024"));
-  producerHelper.SetPrefix(prefix);
-  producerHelper.Install(producerMain); // last node
-
-  ndnGlobalRoutingHelper.AddOrigins(prefix, producerMain);
-
-  // ndnGlobalRoutingHelper.AddOrigins(prefix, producerMain);
+  Ptr<Node> producerSecondary = Names::Find<Node>("rtr-" + vecProdId[1]);
+  ndn::AppHelper producerSecondaryHelper("ns3::ndn::Producer");
+  producerSecondaryHelper.SetAttribute("PayloadSize", StringValue("1024"));
+  producerSecondaryHelper.SetPrefix(prefix + "/minor");
+  producerSecondaryHelper.Install(producerSecondary); // last node
 
   NodeContainer majorConsumerNodes;
 
@@ -228,12 +231,12 @@ main(int argc, char* argv[])
 
   ndn::AppHelper majorConsumerHelper("ns3::ndn::ConsumerZipfMandelbrot");
   majorConsumerHelper.SetPrefix(prefix + "/major");
-  majorConsumerHelper.SetAttribute("Frequency", StringValue("100")); // 100 interests a second
+  majorConsumerHelper.SetAttribute("Frequency", StringValue("5")); // 100 interests a second
   majorConsumerHelper.Install(majorConsumerNodes);
 
   NodeContainer minorConsumerNodes;
 
-  for (string id : vecConMinorId) {
+  for (string id : vecConMajorId) {
     minorConsumerNodes.Add(Names::Find<Node>("rtr-" + id));
   }
 
@@ -254,6 +257,7 @@ main(int argc, char* argv[])
   minorConsumerNodes.Add(Names::Find<Node>("rtr-28"));
   minorConsumerNodes.Add(Names::Find<Node>("rtr-34"));
 */
+
   ndn::AppHelper minorConsumerHelper("ns3::ndn::ConsumerZipfMandelbrot");
   minorConsumerHelper.SetPrefix(prefix + "/minor");
   minorConsumerHelper.SetAttribute("Frequency", StringValue("5"));
@@ -267,19 +271,30 @@ main(int argc, char* argv[])
   }
 
   //major
-  FibHelper::AddRoute(Names::Find<Node>("rtr-28"), ndn::Name(prefix + "/major"), Names::Find<Node>("rtr-" + env_prdId), 0);
+  FibHelper::AddRoute(Names::Find<Node>("rtr-2"), ndn::Name(prefix + "/major"), Names::Find<Node>("rtr-1"), 0);
+  FibHelper::AddRoute(Names::Find<Node>("rtr-1"), ndn::Name(prefix + "/major"), Names::Find<Node>("rtr-3"), 0);
+  FibHelper::AddRoute(Names::Find<Node>("rtr-3"), ndn::Name(prefix + "/major"), Names::Find<Node>("rtr-34"), 0);
+  FibHelper::AddRoute(Names::Find<Node>("rtr-34"), ndn::Name(prefix + "/major"), Names::Find<Node>("rtr-" + vecProdId[0]), 0);
   
   FibHelper::AddRoute(Names::Find<Node>("rtr-4"), ndn::Name(prefix + "/major"), Names::Find<Node>("rtr-5"), 0);
-  FibHelper::AddRoute(Names::Find<Node>("rtr-5"), ndn::Name(prefix + "/major"), Names::Find<Node>("rtr-" + env_prdId), 0);
-  
-  //minor
-  FibHelper::AddRoute(Names::Find<Node>("rtr-21"), ndn::Name(prefix + "/minor"), Names::Find<Node>("rtr-6"), 0);
-  FibHelper::AddRoute(Names::Find<Node>("rtr-6"), ndn::Name(prefix + "/minor"), Names::Find<Node>("rtr-5"), 0);
-  FibHelper::AddRoute(Names::Find<Node>("rtr-5"), ndn::Name(prefix + "/minor"), Names::Find<Node>("rtr-" + env_prdId), 0);
-  
-  FibHelper::AddRoute(Names::Find<Node>("rtr-8"), ndn::Name(prefix + "/minor"), Names::Find<Node>("rtr-32"), 0);
-  FibHelper::AddRoute(Names::Find<Node>("rtr-32"), ndn::Name(prefix + "/minor"), Names::Find<Node>("rtr-" + env_prdId), 0);
+  FibHelper::AddRoute(Names::Find<Node>("rtr-5"), ndn::Name(prefix + "/major"), Names::Find<Node>("rtr-3"), 0);
 
+  FibHelper::AddRoute(Names::Find<Node>("rtr-13"), ndn::Name(prefix + "/major"), Names::Find<Node>("rtr-11"), 0);
+  FibHelper::AddRoute(Names::Find<Node>("rtr-11"), ndn::Name(prefix + "/major"), Names::Find<Node>("rtr-14"), 0);
+  FibHelper::AddRoute(Names::Find<Node>("rtr-14"), ndn::Name(prefix + "/major"), Names::Find<Node>("rtr-27"), 0);
+  FibHelper::AddRoute(Names::Find<Node>("rtr-27"), ndn::Name(prefix + "/major"), Names::Find<Node>("rtr-5"), 0);
+
+  FibHelper::AddRoute(Names::Find<Node>("rtr-3"), ndn::Name(prefix + "/minor"), Names::Find<Node>("rtr-5"), 0);
+  FibHelper::AddRoute(Names::Find<Node>("rtr-5"), ndn::Name(prefix + "/minor"), Names::Find<Node>("rtr-27"), 0);
+  FibHelper::AddRoute(Names::Find<Node>("rtr-27"), ndn::Name(prefix + "/minor"), Names::Find<Node>("rtr-26"), 0);
+  FibHelper::AddRoute(Names::Find<Node>("rtr-26"), ndn::Name(prefix + "/minor"), Names::Find<Node>("rtr-25"), 0);
+  FibHelper::AddRoute(Names::Find<Node>("rtr-25"), ndn::Name(prefix + "/minor"), Names::Find<Node>("rtr-" + vecProdId[1]), 0);
+
+  FibHelper::AddRoute(Names::Find<Node>("rtr-14"), ndn::Name(prefix + "/minor"), Names::Find<Node>("rtr-27"), 0);
+
+  FibHelper::AddRoute(Names::Find<Node>("rtr-18"), ndn::Name(prefix + "/minor"), Names::Find<Node>("rtr-11"), 0);
+  FibHelper::AddRoute(Names::Find<Node>("rtr-11"), ndn::Name(prefix + "/minor"), Names::Find<Node>("rtr-20"), 0);
+  FibHelper::AddRoute(Names::Find<Node>("rtr-20"), ndn::Name(prefix + "/minor"), Names::Find<Node>("rtr-25"), 0);
 
   // Calculate and install FIBs
   GlobalRoutingHelper::CalculateRoutes();
