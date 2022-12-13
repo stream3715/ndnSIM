@@ -129,15 +129,7 @@ main(int argc, char* argv[])
   // Install NDN stack on all nodes
   ndn::StackHelper ndnHelper;
   // ndnHelper.setPolicy("nfd::cs::lru");
-  char* tmp = getenv("CS_SIZE");
-
-  string env_csSize(tmp ? tmp : "");
-  if (env_csSize.empty()) {
-    cerr << "[ERROR] No such variable found!" << endl;
-    exit(EXIT_FAILURE);
-  }
-
-  ndnHelper.setCsSize(atoi(env_csSize.c_str()));
+  ndnHelper.setCsSize(0);
   ndnHelper.InstallAll();
 
   // Choosing forwarding strategy
@@ -149,7 +141,8 @@ main(int argc, char* argv[])
 
   // Installing applications
 
-  tmp = getenv("ID_PRD");
+  char* tmp = getenv("ID_PRD");
+
   string env_prdId(tmp ? tmp : "");
   if (env_prdId.empty()) {
     cerr << "[ERROR] No such variable found!" << endl;
@@ -270,27 +263,20 @@ main(int argc, char* argv[])
     ndnGlobalRoutingHelper.AddOrigins("/" + value, nodes.Get(index));
   }
 
-  // major
-  FibHelper::AddRoute(Names::Find<Node>("rtr-28"), ndn::Name(prefix + "/major"),
-                      Names::Find<Node>("rtr-" + env_prdId), 0);
+  //major
+  FibHelper::AddRoute(Names::Find<Node>("rtr-28"), ndn::Name(prefix + "/major"), Names::Find<Node>("rtr-" + env_prdId), 0);
+  
+  FibHelper::AddRoute(Names::Find<Node>("rtr-4"), ndn::Name(prefix + "/major"), Names::Find<Node>("rtr-5"), 0);
+  FibHelper::AddRoute(Names::Find<Node>("rtr-5"), ndn::Name(prefix + "/major"), Names::Find<Node>("rtr-" + env_prdId), 0);
+  
+  //minor
+  FibHelper::AddRoute(Names::Find<Node>("rtr-21"), ndn::Name(prefix + "/minor"), Names::Find<Node>("rtr-6"), 0);
+  FibHelper::AddRoute(Names::Find<Node>("rtr-6"), ndn::Name(prefix + "/minor"), Names::Find<Node>("rtr-5"), 0);
+  FibHelper::AddRoute(Names::Find<Node>("rtr-5"), ndn::Name(prefix + "/minor"), Names::Find<Node>("rtr-" + env_prdId), 0);
+  
+  FibHelper::AddRoute(Names::Find<Node>("rtr-8"), ndn::Name(prefix + "/minor"), Names::Find<Node>("rtr-32"), 0);
+  FibHelper::AddRoute(Names::Find<Node>("rtr-32"), ndn::Name(prefix + "/minor"), Names::Find<Node>("rtr-" + env_prdId), 0);
 
-  FibHelper::AddRoute(Names::Find<Node>("rtr-4"), ndn::Name(prefix + "/major"),
-                      Names::Find<Node>("rtr-5"), 0);
-  FibHelper::AddRoute(Names::Find<Node>("rtr-5"), ndn::Name(prefix + "/major"),
-                      Names::Find<Node>("rtr-" + env_prdId), 0);
-
-  // minor
-  FibHelper::AddRoute(Names::Find<Node>("rtr-21"), ndn::Name(prefix + "/minor"),
-                      Names::Find<Node>("rtr-6"), 0);
-  FibHelper::AddRoute(Names::Find<Node>("rtr-6"), ndn::Name(prefix + "/minor"),
-                      Names::Find<Node>("rtr-5"), 0);
-  FibHelper::AddRoute(Names::Find<Node>("rtr-5"), ndn::Name(prefix + "/minor"),
-                      Names::Find<Node>("rtr-" + env_prdId), 0);
-
-  FibHelper::AddRoute(Names::Find<Node>("rtr-8"), ndn::Name(prefix + "/minor"),
-                      Names::Find<Node>("rtr-32"), 0);
-  FibHelper::AddRoute(Names::Find<Node>("rtr-32"), ndn::Name(prefix + "/minor"),
-                      Names::Find<Node>("rtr-" + env_prdId), 0);
 
   // Calculate and install FIBs
   GlobalRoutingHelper::CalculateRoutes();
