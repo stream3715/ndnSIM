@@ -1,8 +1,8 @@
 [submodule "NFD"]
 	path = NFD
 	url = https://github.com/stream3715/NFD
-	branch = NFD-0.7.0-ndnSIM
+	branch = ndn-vanilla
 [submodule "ndn-cxx"]
 	path = ndn-cxx
 	url = https://github.com/stream3715/ndn-cxx
-	branch = ndn-cxx-0.7.0-ndnSIM
+	branch = ndn-vanilla
