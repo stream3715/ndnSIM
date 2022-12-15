@@ -24,6 +24,8 @@
 #include "ns3/packet.h"
 #include "ns3/simulator.h"
 
+#include <ndn-cxx/lp/tags.hpp>
+
 #include "model/ndn-l3-protocol.hpp"
 #include "helper/ndn-fib-helper.hpp"
 
@@ -47,9 +49,9 @@ Producer::GetTypeId(void)
       .AddAttribute("Prefix", "Prefix, for which producer has the data", StringValue("/"),
                     MakeNameAccessor(&Producer::m_prefix), MakeNameChecker())
       .AddAttribute(
-         "Postfix",
-         "Postfix that is added to the output data (e.g., for adding producer-uniqueness)",
-         StringValue("/"), MakeNameAccessor(&Producer::m_postfix), MakeNameChecker())
+        "Postfix",
+        "Postfix that is added to the output data (e.g., for adding producer-uniqueness)",
+        StringValue("/"), MakeNameAccessor(&Producer::m_postfix), MakeNameChecker())
       .AddAttribute("PayloadSize", "Virtual payload size for Content packets", UintegerValue(1024),
                     MakeUintegerAccessor(&Producer::m_virtualPayloadSize),
                     MakeUintegerChecker<uint32_t>())
@@ -57,10 +59,10 @@ Producer::GetTypeId(void)
                     TimeValue(Seconds(0)), MakeTimeAccessor(&Producer::m_freshness),
                     MakeTimeChecker())
       .AddAttribute(
-         "Signature",
-         "Fake signature, 0 valid signature (default), other values application-specific",
-         UintegerValue(0), MakeUintegerAccessor(&Producer::m_signature),
-         MakeUintegerChecker<uint32_t>())
+        "Signature",
+        "Fake signature, 0 valid signature (default), other values application-specific",
+        UintegerValue(0), MakeUintegerAccessor(&Producer::m_signature),
+        MakeUintegerChecker<uint32_t>())
       .AddAttribute("KeyLocator",
                     "Name to be used for key locator.  If root, then key locator is not used",
                     NameValue(), MakeNameAccessor(&Producer::m_keyLocator), MakeNameChecker());
@@ -108,10 +110,17 @@ Producer::OnInterest(shared_ptr<const Interest> interest)
   data->setName(dataName);
   data->setFreshnessPeriod(::ndn::time::milliseconds(m_freshness.GetMilliSeconds()));
 
-  data->setContent(make_shared< ::ndn::Buffer>(m_virtualPayloadSize));
+  data->setContent(make_shared<::ndn::Buffer>(m_virtualPayloadSize));
+
+  int hopCount = 0;
+  auto hopCountTag = interest->getTag<lp::HopCountTag>();
+  if (hopCountTag != nullptr) { // e.g., packet came from local node's cache
+    hopCount = *hopCountTag;
+  }
+  data->setTag(make_shared<lp::HopCountTag>(hopCount));
 
   Signature signature;
-  SignatureInfo signatureInfo(static_cast< ::ndn::tlv::SignatureTypeValue>(255));
+  SignatureInfo signatureInfo(static_cast<::ndn::tlv::SignatureTypeValue>(255));
 
   if (m_keyLocator.size() > 0) {
     signatureInfo.setKeyLocator(m_keyLocator);
