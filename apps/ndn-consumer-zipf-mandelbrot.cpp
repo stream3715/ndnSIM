@@ -41,7 +41,7 @@ ConsumerZipfMandelbrot::GetTypeId(void)
       .SetParent<ConsumerCbr>()
       .AddConstructor<ConsumerZipfMandelbrot>()
 
-      .AddAttribute("NumberOfContents", "Number of the Contents in total", StringValue("10"),
+      .AddAttribute("NumberOfContents", "Number of the Contents in total", StringValue("100"),
                     MakeUintegerAccessor(&ConsumerZipfMandelbrot::SetNumberOfContents,
                                          &ConsumerZipfMandelbrot::GetNumberOfContents),
                     MakeUintegerChecker<uint32_t>())
@@ -60,7 +60,7 @@ ConsumerZipfMandelbrot::GetTypeId(void)
 }
 
 ConsumerZipfMandelbrot::ConsumerZipfMandelbrot()
-  : m_N(10) // needed here to make sure when SetQ/SetS are called, there is a valid value of N
+  : m_N(100) // needed here to make sure when SetQ/SetS are called, there is a valid value of N
   , m_q(0.7)
   , m_s(0.7)
   , m_seqRng(CreateObject<UniformRandomVariable>())
